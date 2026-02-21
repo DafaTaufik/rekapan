@@ -91,3 +91,33 @@ func GetTransactionByBranchID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": transactions})
 }
+
+// TogglePaymentStatus toggles status_pembayaran between 'lunas' and 'belum lunas'
+func TogglePaymentStatus(c *gin.Context) {
+	id := c.Param("id")
+
+	// Find the transaction first
+	var transaction model.Transaction
+	if err := config.DB.First(&transaction, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Transaction not found"})
+		return
+	}
+
+	// Toggle the status
+	newStatus := "lunas"
+	if transaction.StatusPembayaran == "lunas" {
+		newStatus = "belum lunas"
+	}
+
+	// Update only the status_pembayaran column
+	if err := config.DB.Model(&transaction).Update("status_pembayaran", newStatus).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update payment status"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":    transaction,
+		"message": "Payment status updated to: " + newStatus,
+	})
+}
+
