@@ -10,11 +10,12 @@ import (
 
 // DailySummaryResult holds the aggregated data for a single day
 type DailySummaryResult struct {
-	Date             string  `json:"date"`
-	TotalTransactions int64  `json:"total_transactions"`
-	TotalRevenue     float64 `json:"total_revenue"`
-	TotalKg          float64 `json:"total_kg"`
-	TotalPc          int64   `json:"total_pc"`
+	Date              string  `json:"date"`
+	TotalTransactions int64   `json:"total_transactions"`
+	TotalRevenue      float64 `json:"total_revenue"`
+	TotalKg           float64 `json:"total_kg"`
+	TotalPc           int64   `json:"total_pc"`
+	TotalPaid         int64   `json:"total_paid"` // Count of transactions with status_pembayaran = 'lunas'
 }
 
 // GetDailySummary returns the summary for a single day.
@@ -45,7 +46,8 @@ func GetDailySummary(c *gin.Context) {
 		COUNT(*) as total_transactions,
 		COALESCE(SUM(total), 0) as total_revenue,
 		COALESCE(SUM(jumlah_kg), 0) as total_kg,
-		COALESCE(SUM(jumlah_pc), 0) as total_pc
+		COALESCE(SUM(jumlah_pc), 0) as total_pc,
+		COUNT(CASE WHEN status_pembayaran = 'lunas' THEN 1 END) as total_paid
 	`).Scan(&result)
 
 	result.Date = dateStr

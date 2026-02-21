@@ -39,6 +39,7 @@ func main() {
 		api.GET("/transactions", handler.GetTransactions)
 		api.GET("/transactions/trx/:trx_id", handler.GetTransactionByTrxID)
 		api.GET("/transactions/branch/:branch_id", handler.GetTransactionByBranchID)
+		api.PATCH("/transactions/:id/toggle-payment", handler.TogglePaymentStatus)
 
 		// Summary
 		api.GET("/summary/daily", handler.GetDailySummary)
