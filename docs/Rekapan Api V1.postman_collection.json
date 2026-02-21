@@ -1,0 +1,255 @@
+{
+  "info": {
+    "_postman_id": "rekap-laundry-api-v1",
+    "name": "Rekapan Api V1",
+    "description": "API collection for Rekap Laundry backend. Base URL and token are managed via collection variables.\n\nHow to use:\n1. Set `base_url` variable (default: http://localhost:8080)\n2. Call POST /api/auth/login — token is saved automatically to `access_token` variable\n3. All protected routes will use the saved token automatically",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) {",
+                  "  pm.collectionVariables.set('access_token', res.access_token);",
+                  "  pm.collectionVariables.set('refresh_token', res.refresh_token);",
+                  "  console.log('Tokens saved to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Your Name\",\n  \"email\": \"your@email.com\",\n  \"password\": \"yourpassword\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Create a new user account. Returns access and refresh tokens immediately (user is logged in right after register).\n\nPassword must be at least 6 characters."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) {",
+                  "  pm.collectionVariables.set('access_token', res.access_token);",
+                  "  pm.collectionVariables.set('refresh_token', res.refresh_token);",
+                  "  console.log('Tokens saved to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"your@email.com\",\n  \"password\": \"yourpassword\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with email and password. Access token and refresh token are automatically saved to collection variables."
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["const res = pm.response.json();", "if (res.access_token) {", "  pm.collectionVariables.set('access_token', res.access_token);", "  console.log('New access token saved');", "}"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "refresh"]
+            },
+            "description": "Get a new access token using the refresh token. New access token is automatically saved."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Get All Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/transactions?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"],
+              "query": [
+                { "key": "page", "value": "1", "description": "Page number (default: 1)" },
+                { "key": "limit", "value": "20", "description": "Items per page (default: 20)" },
+                { "key": "date", "value": "2026-01-17", "description": "Filter by date (YYYY-MM-DD)", "disabled": true },
+                { "key": "branch_id", "value": "1", "description": "Filter by branch ID", "disabled": true },
+                { "key": "status", "value": "selesai", "description": "Filter by status", "disabled": true }
+              ]
+            },
+            "description": "Returns a paginated list of transactions.\n\nOptional query params:\n- `date`: Filter by specific date (YYYY-MM-DD)\n- `branch_id`: Filter by branch\n- `status`: Filter by status\n- `page`: Page number\n- `limit`: Items per page"
+          }
+        },
+        {
+          "name": "Get Transaction by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/transactions/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "1"]
+            },
+            "description": "Returns details of a single transaction by ID."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Summary",
+      "item": [
+        {
+          "name": "Daily Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/summary/daily",
+              "host": ["{{base_url}}"],
+              "path": ["api", "summary", "daily"],
+              "query": [
+                { "key": "date", "value": "2026-01-17", "description": "Target date (YYYY-MM-DD). Defaults to today if omitted.", "disabled": true },
+                { "key": "branch_id", "value": "1", "description": "Filter by branch ID", "disabled": true }
+              ]
+            },
+            "description": "Returns aggregated summary for a single day: total transactions, revenue, kg, and pc.\n\nQuery params:\n- `date`: Date to query (YYYY-MM-DD). Defaults to today.\n- `branch_id`: (optional) Filter by branch"
+          }
+        },
+        {
+          "name": "Range Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/summary/range?start_date=2026-01-01&end_date=2026-01-31",
+              "host": ["{{base_url}}"],
+              "path": ["api", "summary", "range"],
+              "query": [
+                { "key": "start_date", "value": "2026-01-01", "description": "Start date (YYYY-MM-DD)" },
+                { "key": "end_date", "value": "2026-01-31", "description": "End date inclusive (YYYY-MM-DD)" },
+                { "key": "branch_id", "value": "1", "description": "Filter by branch ID", "disabled": true }
+              ]
+            },
+            "description": "Returns a day-by-day breakdown within a date range.\n\nQuery params:\n- `start_date`: Start date (YYYY-MM-DD) — required\n- `end_date`: End date inclusive (YYYY-MM-DD) — required\n- `branch_id`: (optional) Filter by branch"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Branches",
+      "item": [
+        {
+          "name": "Get All Branches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/branches",
+              "host": ["{{base_url}}"],
+              "path": ["api", "branches"]
+            },
+            "description": "Returns a list of all branches with their transaction count and total revenue."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Ping",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ping",
+              "host": ["{{base_url}}"],
+              "path": ["ping"]
+            },
+            "description": "Simple health check to verify the server is running."
+          }
+        }
+      ]
+    }
+  ]
+}

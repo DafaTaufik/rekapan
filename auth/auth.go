@@ -8,7 +8,7 @@ import (
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 
-// getSecret reads JWT secret from environment variable with fallback
+// getAccessSecret reads the JWT access secret from environment variable with a fallback default
 func getAccessSecret() []byte {
 	secret := os.Getenv("JWT_ACCESS_SECRET")
 	if secret == "" {
@@ -17,6 +17,7 @@ func getAccessSecret() []byte {
 	return []byte(secret)
 }
 
+// getRefreshSecret reads the JWT refresh secret from environment variable with a fallback default
 func getRefreshSecret() []byte {
 	secret := os.Getenv("JWT_REFRESH_SECRET")
 	if secret == "" {
@@ -25,27 +26,25 @@ func getRefreshSecret() []byte {
 	return []byte(secret)
 }
 
-// Token expiration times
+// Token expiration durations
 const (
-	AccessTokenExpiry  = 1 * time.Hour        // Access token valid for 1 hour
-	RefreshTokenExpiry = 30 * 24 * time.Hour  // Refresh token valid for 30 days
+	AccessTokenExpiry  = 1 * time.Hour       // Access token valid for 1 hour
+	RefreshTokenExpiry = 30 * 24 * time.Hour // Refresh token valid for 30 days
 )
 
-// Claims is the custom JWT claims structure
+// Claims defines the custom JWT claims structure
 type Claims struct {
-	UserID   int    `json:"user_id"`
-	Email    string `json:"email"`
-	BranchID int    `json:"branch_id,omitempty"`
+	UserID int    `json:"user_id"`
+	Email  string `json:"email"`
 	jwt.RegisteredClaims
 }
 
 // GenerateAccessToken creates a short-lived access token
-func GenerateAccessToken(userID int, email string, branchID int) (string, error) {
+func GenerateAccessToken(userID int, email string) (string, error) {
 	now := time.Now()
 	claims := Claims{
-		UserID:   userID,
-		Email:    email,
-		BranchID: branchID,
+		UserID: userID,
+		Email:  email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenExpiry)),
 			IssuedAt:  jwt.NewNumericDate(now),
@@ -84,10 +83,10 @@ func ValidateRefreshToken(tokenString string) (*Claims, error) {
 	return validateToken(tokenString, getRefreshSecret())
 }
 
-// validateToken is an internal helper for token validation
+// validateToken is an internal helper that validates a JWT token against the given secret
 func validateToken(tokenString string, secret []byte) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		// Ensure the signing method is HMAC
+		// Ensure signing method is HMAC
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
 		}
@@ -113,5 +112,5 @@ func RefreshAccessToken(refreshToken string) (string, error) {
 		return "", err
 	}
 
-	return GenerateAccessToken(claims.UserID, claims.Email, claims.BranchID)
+	return GenerateAccessToken(claims.UserID, claims.Email)
 }
