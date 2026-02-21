@@ -49,8 +49,8 @@ func GetTransactions(c *gin.Context) {
 	var total int64
 	query.Count(&total)
 
-	// Fetch records
-	result := query.Order("tanggal_masuk DESC").Limit(limit).Offset(offset).Find(&transactions)
+	// Fetch records — latest date first, earliest time within the same day first
+	result := query.Order("DATE(tanggal_masuk) DESC, tanggal_masuk ASC").Limit(limit).Offset(offset).Find(&transactions)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch transactions"})
 		return
@@ -64,16 +64,30 @@ func GetTransactions(c *gin.Context) {
 	})
 }
 
-// GetTransactionByID returns the detail of a single transaction
-func GetTransactionByID(c *gin.Context) {
-	id := c.Param("id")
+// GetTransactionByTrxID finds a transaction by the trailing sequence number of no_transaksi.
+// Example: trx_id=01444 will match no_transaksi = 'TRX/260116/01444'
+func GetTransactionByTrxID(c *gin.Context) {
+	trxID := c.Param("trx_id")
 
 	var transaction model.Transaction
-	result := config.DB.First(&transaction, id)
+	result := config.DB.Where("no_transaksi LIKE ?", "%/"+trxID).First(&transaction)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Transaction not found"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": transaction})
+}
+
+func GetTransactionByBranchID(c *gin.Context) {
+	branchID := c.Param("branch_id")
+
+	var transactions []model.Transaction
+	result := config.DB.Where("branch_id = ?", branchID).Order("DATE(tanggal_masuk) DESC, tanggal_masuk ASC").Find(&transactions)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Transactions not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": transactions})
 }
