@@ -11,13 +11,13 @@ type Transaction struct {
 	NamaPelanggan    string    `gorm:"column:nama_pelanggan" json:"nama_pelanggan"`
 	Status           string    `gorm:"column:status" json:"status"`
 	StatusPembayaran string    `gorm:"column:status_pembayaran" json:"status_pembayaran"`
-	DP               float64   `gorm:"column:dp" json:"dp"`
-	Pelunasan        float64   `gorm:"column:pelunasan" json:"pelunasan"`
-	Subtotal         float64   `gorm:"column:subtotal" json:"subtotal"`
-	BiayaAntarJemput float64   `gorm:"column:biaya_antar_jemput" json:"biaya_antar_jemput"`
-	Diskon           float64   `gorm:"column:diskon" json:"diskon"`
-	DiskonPoin       float64   `gorm:"column:diskon_poin" json:"diskon_poin"`
-	Total            float64   `gorm:"column:total" json:"total"`
+	DP               int       `gorm:"column:dp" json:"dp"`
+	Pelunasan        string    `gorm:"column:pelunasan" json:"pelunasan"`
+	Subtotal         int       `gorm:"column:subtotal" json:"subtotal"`
+	BiayaAntarJemput int       `gorm:"column:biaya_antar_jemput" json:"biaya_antar_jemput"`
+	Diskon           int       `gorm:"column:diskon" json:"diskon"`
+	DiskonPoin       int       `gorm:"column:diskon_poin" json:"diskon_poin"`
+	Total            int       `gorm:"column:total" json:"total"`
 	JumlahKg         float64   `gorm:"column:jumlah_kg" json:"jumlah_kg"`
 	JumlahPc         int       `gorm:"column:jumlah_pc" json:"jumlah_pc"`
 	CreatedAt        time.Time `gorm:"column:created_at" json:"created_at"`

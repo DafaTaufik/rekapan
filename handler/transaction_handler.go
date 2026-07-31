@@ -80,12 +80,17 @@ func GetTransactionByTrxID(c *gin.Context) {
 }
 
 func GetTransactionByBranchID(c *gin.Context) {
-	branchID := c.Param("branch_id")
+	branchIDStr := c.Param("branch_id")
+	branchID, err := strconv.Atoi(branchIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid branch ID"})
+		return
+	}
 
 	var transactions []model.Transaction
 	result := config.DB.Where("branch_id = ?", branchID).Order("DATE(tanggal_masuk) DESC, tanggal_masuk ASC").Find(&transactions)
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Transactions not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch transactions", "details": result.Error.Error()})
 		return
 	}
 
