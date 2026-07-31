@@ -14,6 +14,7 @@ type Transaction struct {
 	DP               int       `gorm:"column:dp" json:"dp"`
 	Pelunasan        string    `gorm:"column:pelunasan" json:"pelunasan"`
 	Subtotal         int       `gorm:"column:subtotal" json:"subtotal"`
+	TotalBiayaTambahan    int       `gorm:"column:total_biaya_tambahan" json:"total_biaya_tambahan"`
 	BiayaAntarJemput int       `gorm:"column:biaya_antar_jemput" json:"biaya_antar_jemput"`
 	Diskon           int       `gorm:"column:diskon" json:"diskon"`
 	DiskonPoin       int       `gorm:"column:diskon_poin" json:"diskon_poin"`

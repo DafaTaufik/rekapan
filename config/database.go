@@ -30,7 +30,7 @@ func ConnectDatabase() {
 	}
 
 	// Build connection string
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Jakarta", host, port, user, password, dbname)
 
 	// Connect to database
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
