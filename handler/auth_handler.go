@@ -17,8 +17,8 @@ type RegisterRequest struct {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+	Identifier string `json:"identifier" binding:"required"`
+	Password   string `json:"password" binding:"required"`
 }
 
 type LoginResponse struct {
@@ -96,17 +96,17 @@ func Login(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Email and password are required",
+			"error": "Password and an identifier (email/username) are required",
 		})
 		return
 	}
 
-	// Find user by email
+	// Find user by email or name (case-insensitive)
 	var user model.Users
-	result := config.DB.Where("email = ?", req.Email).First(&user)
+	result := config.DB.Where("LOWER(email) = LOWER(?) OR LOWER(name) = LOWER(?)", req.Identifier, req.Identifier).First(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Invalid email or password",
+			"error": "Invalid email/name or password",
 		})
 		return
 	}
@@ -115,7 +115,7 @@ func Login(c *gin.Context) {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Invalid email or password",
+			"error": "Invalid email/name or password",
 		})
 		return
 	}
